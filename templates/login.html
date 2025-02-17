@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Truth Detector - Login</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1>Welcome to Truth Detector</h1>
+        <form id="emailForm" action="/login/email" method="POST">
+            <input type="email" name="email" placeholder="Enter your email (optional)" required>
+            <button type="submit">Continue with Email</button>
+        </form>
+        
+        <div class="separator">OR</div>
+        
+        <form id="guestForm" action="/login/guest" method="POST">
+            <button type="submit">Continue as Guest</button>
+        </form>
+    </div>
+</body>
+</html>
