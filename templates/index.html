@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Truth Detector Challenge</title>
     <style>
         :root {
@@ -27,16 +29,6 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .score-board {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
         .container {
             display: flex;
             gap: 30px;
@@ -49,49 +41,19 @@
             border-radius: 12px;
             padding: 25px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease-in-out;
             border: 1px solid #e0e0e0;
         }
 
         .news-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-        }
-
-        .media-container {
-            height: 250px;
-            margin-bottom: 20px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 8px;
-            background-image: url('https://via.placeholder.com/400x250');
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.12);
         }
 
         .summary {
             line-height: 1.6;
             color: #333;
             font-size: 16px;
-        }
-
-        .feedback {
-            display: none;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px auto;
-            max-width: 800px;
-            text-align: center;
-        }
-
-        .correct {
-            background: #e8f5e9;
-            border: 2px solid #43a047;
-            color: #2e7d32;
-        }
-
-        .incorrect {
-            background: #ffebee;
-            border: 2px solid #e53935;
-            color: #c62828;
         }
 
         .loader {
@@ -109,155 +71,60 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        .main-image-container {
-            text-align: center;
-            margin: 30px 0;
-        }
-
-        .main-image {
-            width: 80%;
-            max-width: 800px;
-            height: 400px;
-            object-fit: cover;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .placeholder-text {
-            color: #666;
-            font-style: italic;
-        }
     </style>
 </head>
 <body>
-    <div class="score-board" id="score">
-        Score: 0
-    </div>
-
     <div class="header">
-        <h1> Spot the Fake News</h1>
-        <p>Test your media literacy skills - identify the misleading story</p>
-    </div>
-
-    <div class="main-image-container">
-        <img src="https://via.placeholder.com/800x400" class="main-image" alt="News visual" id="mainImage">
+        <h1>Spot the Fake News</h1>
+        <p>Test your media literacy skills - Identify the misleading story</p>
     </div>
 
     <div class="container">
-        <div class="news-card" id="news1" onclick="checkAnswer(1)">
-            <div class="summary placeholder-text" id="news_summary_1">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</div>
+        <div class="news-card" id="news1">
+            <h3>News 1</h3>
+            <p class="summary" id="news_summary_1">Loading...</p>
             <button onclick="speakText('news_summary_1')">Read Text</button>
         </div>
         
-        <div class="news-card" id="news2" onclick="checkAnswer(2)">
-            <div class="summary placeholder-text" id="news_summary_2">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</div>
+        <div class="news-card" id="news2">
+            <h3>News 2</h3>
+            <p class="summary" id="news_summary_2">Loading...</p>
             <button onclick="speakText('news_summary_2')">Read Text</button>
         </div>
     </div>
 
-    
     <div class="loader" id="loader"></div>
-    <div class="feedback" id="feedback"></div>
 
     <script>
-        // Add score tracking
-        let score = 0;
-        const scoreElement = document.getElementById('score');
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchGeneratedSummaries();
+        });
 
-        const stories = [
-            {
-                image: "https://picsum.photos/800/400",
-                trueSummary: "Official data shows GDP grew 3.4% in Q2 2023, matching economist predictions.",
-                fakeSummary: "Secret government reports reveal actual GDP plummeted 5.1% last quarter.",
-                explanation: "The fake story uses unverified claims about 'secret reports'...",
-                sources: ["BEA.gov", "Federal Reserve Economic Data"],
-                fakePosition: 2
-            },
-            // Add more stories
-        ];
+        async function fetchGeneratedSummaries() {
+            document.getElementById('loader').style.display = 'block';
 
-        function updateStoryDisplay(story) {
-            // Update main image
-            document.getElementById('mainImage').src = story.image;
-            
-            // Update summaries
-            document.getElementById('news1').querySelector('.summary').textContent = story.trueSummary;
-            document.getElementById('news1').querySelector('.summary').classList.remove('placeholder-text');
-            
-            document.getElementById('news2').querySelector('.summary').textContent = story.fakeSummary;
-            document.getElementById('news2').querySelector('.summary').classList.remove('placeholder-text');
-        }
-
-        // Modified checkAnswer function
-        async function checkAnswer(selectedPosition) {
-            showLoader();
-            
             try {
-                const response = await fetch('/verify', {
+                const response = await fetch('/generate', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        storyId: currentStory,
-                        selectedPosition: selectedPosition
+                        news_article: "A major scientific breakthrough in renewable energy was announced today.",
+                        difficulty: 3  // Can be randomized or user-defined
                     })
                 });
 
                 const result = await response.json();
-                
-                if(result.correct) {
-                    score += 100;
-                    scoreElement.textContent = `Score: ${score}`;
-                    showFeedback(result, true);
-                } else {
-                    showFeedback(result, false);
-                }
+
+                // Update summaries in the HTML
+                document.getElementById('news_summary_1').textContent = result.real_summary;
+                document.getElementById('news_summary_2').textContent = result.fake_summary;
+
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error fetching summaries:', error);
             } finally {
-                hideLoader();
-            }
-        }
-
-        function showLoader() {
-            document.getElementById('loader').style.display = 'block';
-        }
-
-        function hideLoader() {
-            document.getElementById('loader').style.display = 'none';
-        }
-
-        // Modified feedback system
-        function showFeedback(result, isCorrect) {
-            const feedback = document.getElementById('feedback');
-            feedback.innerHTML = `
-                <h3>${isCorrect ? '✅ Correct!' : '❌ Incorrect'}</h3>
-                <p>${result.explanation}</p>
-                ${result.sources ? `<div class="sources">Sources: ${result.sources}</div>` : ''}
-            `;
-            feedback.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
-            feedback.style.display = 'block';
-            
-            setTimeout(async () => {
-                feedback.style.display = 'none';
-                await loadNextStory();
-            }, 3000);
-        }
-
-        async function loadNextStory() {
-            showLoader();
-            try {
-                const response = await fetch('/next-story');
-                const story = await response.json();
-                updateStoryDisplay(story);
-            } catch (error) {
-                console.error('Error loading story:', error);
-            } finally {
-                hideLoader();
+                document.getElementById('loader').style.display = 'none';
             }
         }
 

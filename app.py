@@ -20,6 +20,12 @@ stories_db = [
     }
 ]
 
+def purgeDB():
+    pass
+
+def dispDB():
+    print(sessions)
+
 @app.route('/')
 def home():
     return render_template('login.html')
@@ -38,12 +44,21 @@ def login_email():
     )
     return resp
 
-@app.route('/login/guest', methods=['POST'])
+@app.route('/login/guest', methods=['POST', 'GET'])
 def login_guest():
+    dispDB()
+    session_id = request.cookies.get(app.config['SESSION_COOKIE_NAME'])
+
+    if session_id and session_id in sessions:
+        session_data = sessions[session_id]
+        print(f"[INFO] Returning existing session for {session_id}")
+        return render_template('index.html', session_data=session_data)
+
+    ### Create new session
     session_data = create_user_session()
     sessions[session_data['session_id']] = session_data
     
-    resp = make_response(render_template('index.html'))
+    resp = make_response(render_template('index.html', session_data=session_data))
     resp.set_cookie(
         app.config['SESSION_COOKIE_NAME'],
         session_data['session_id'],
@@ -51,16 +66,35 @@ def login_guest():
     )
     return resp
 
+
 @app.route('/api/next-story', methods=['GET'])
 def next_story():
     session_id = request.cookies.get(app.config['SESSION_COOKIE_NAME'])
-    
-    # For demo, just return first story. Implement rotation logic later
-    story = stories_db[0]
+
+    # Sample article (this should be fetched dynamically in production)
+    sample_news_article = """
+    Scientists have discovered a new Earth-like exoplanet that may support life.
+    The exoplanet, located in the habitable zone of its star, has a similar atmosphere to Earth.
+    """
+
+    fake_level = 3  # You can randomize or let users set the difficulty
+
+    # Call OpenAI's API to generate real and fake summaries
+    result = generate_summaries(sample_news_article, fake_level)
+
+    # Parse the response
+    try:
+        summaries = result if isinstance(result, dict) else eval(result)  # Convert string JSON to dict
+    except Exception as e:
+        return jsonify({"error": f"Failed to parse AI response: {str(e)}"}), 500
+
+    # Return the dynamically generated story
     return jsonify({
-        'image': story['image'],
-        'trueSummary': story['true_summary'],
-        'fakeSummary': story['fake_summary']
+        "image": "https://picsum.photos/800/400",  # Placeholder image, can be dynamic
+        "trueSummary": summaries.get("real_summary", "Failed to generate summary."),
+        "fakeSummary": summaries.get("fake_summary", "Failed to generate summary."),
+        "explanation": summaries.get("explanation", "No explanation provided."),
+        "fakePosition": 2 if fake_level % 2 == 0 else 1  # Randomize position of fake news
     })
 
 @app.route('/api/submit-answer', methods=['POST'])
@@ -108,16 +142,10 @@ def submit_answer():
 
 @app.route('/generate', methods=['POST'])
 def generate():
-    """
-    API Endpoint: Accepts JSON input and returns real and fake summaries.
-    """
     try:
         data = request.get_json()
-        news_article = data.get("news_article", "")
-        fake_level = int(data.get("difficulty", 1))  # Fake level (1-9)
-
-        if not news_article:
-            return jsonify({"error": "No news article provided"}), 400
+        news_article = data.get("news_article", "Default news story.")
+        fake_level = int(data.get("difficulty", 3))  # Fake level (1-9)
 
         if fake_level < 1 or fake_level > 9:
             return jsonify({"error": "Difficulty must be between 1 and 9"}), 400

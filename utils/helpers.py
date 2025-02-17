@@ -17,3 +17,6 @@ def create_user_session(email=None):
             'history': []
         }
     }
+
+def isGuest(session):
+    return session['email'] == None
