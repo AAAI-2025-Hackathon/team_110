@@ -81,13 +81,13 @@
 
     <div class="container">
         <div class="news-card" id="news1">
-            <h3>News 1</h3>
+            <h3>Summary 1</h3>
             <p class="summary" id="news_summary_1">Loading...</p>
             <button onclick="speakText('news_summary_1')">Read Text</button>
         </div>
         
         <div class="news-card" id="news2">
-            <h3>News 2</h3>
+            <h3>Summary 2</h3>
             <p class="summary" id="news_summary_2">Loading...</p>
             <button onclick="speakText('news_summary_2')">Read Text</button>
         </div>
@@ -98,7 +98,10 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             fetchGeneratedSummaries();
+            setupClickHandlers();
         });
+
+        let correctFakePosition;
 
         async function fetchGeneratedSummaries() {
             document.getElementById('loader').style.display = 'block';
@@ -110,16 +113,25 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        news_article: "A major scientific breakthrough in renewable energy was announced today.",
-                        difficulty: 3  // Can be randomized or user-defined
+                        //news_article: "A major scientific breakthrough in renewable energy was announced today.",
+                        //difficulty: 3  // Can be randomized or user-defined
                     })
                 });
 
+                //// We donot use the above body at all as the data about the user is on the flask server. 
+
                 const result = await response.json();
 
-                // Update summaries in the HTML
-                document.getElementById('news_summary_1').textContent = result.real_summary;
-                document.getElementById('news_summary_2').textContent = result.fake_summary;
+                const randomOrder = Math.random() < 0.5;
+                if (randomOrder) {
+                    document.getElementById('news_summary_1').textContent = result.real_summary;
+                    document.getElementById('news_summary_2').textContent = result.fake_summary;
+                    correctFakePosition = 2;  // Fake summary is in the second position
+                } else {
+                    document.getElementById('news_summary_1').textContent = result.fake_summary;
+                    document.getElementById('news_summary_2').textContent = result.real_summary;
+                    correctFakePosition = 1;  // Fake summary is in the first position
+                }
 
             } catch (error) {
                 console.error('Error fetching summaries:', error);
@@ -166,6 +178,35 @@
         window.addEventListener("beforeunload", () => {
             window.speechSynthesis.cancel();
         });
+
+
+        function setupClickHandlers() {
+            document.getElementById('news1').addEventListener('click', () => sendClickData(1));
+            document.getElementById('news2').addEventListener('click', () => sendClickData(2));
+        }
+
+        async function sendClickData(selectedNews) {
+            try {
+                console.log("Fake:", correctFakePosition);
+                console.log("Clicked:", selectedNews);
+                const response = await fetch('/log-click', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        selected_news: selectedNews,
+                        correct_fake_position: correctFakePosition
+                    })
+                });
+
+                const result = await response.json();
+                console.log(result.message);  // Logs response from Flask
+
+            } catch (error) {
+                console.error('Error sending click data:', error);
+            }
+        }
     </script>
 </body>
 </html>
