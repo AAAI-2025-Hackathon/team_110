@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truth Detector Challenge</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --background: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--background);
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .news-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .summary {
+            line-height: 1.6;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-fake {
+            background-color: #e74c3c;
+        }
+        .btn-fake:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-true {
+            background-color: #2ecc71;
+        }
+        .btn-true:hover {
+            background-color: #27ae60;
+        }
+
+        .loader {
+            display: none;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Truth Detector Challenge</h1>
+        <p>Can you determine if the news is real or fake?</p>
+    </div>
+
+    <div class="news-card">
+        <h3>News Summary</h3>
+        <p class="summary" id="news_summary">Loading...</p>
+        <button onclick="speakText('news_summary')">Read Text</button>
+    </div>
+
+    <div class="btn-container">
+        <button class="btn btn-fake" onclick="checkAnswer(false)">Fake</button>
+        <button class="btn btn-true" onclick="checkAnswer(true)">True</button>
+    </div>
+
+    <p id="explanationText" style="display: none; font-weight: bold; color: red;"></p>
+    <button id="nextButton" style="display: none; margin-top: 20px;" onclick="fetchGeneratedSummary()">Next Question</button>
+
+    <div class="loader" id="loader"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchGeneratedSummary();
+        });
+
+        let isTrueSummary;
+
+        async function fetchGeneratedSummary() {
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('explanationText').style.display = 'none';
+            document.getElementById('nextButton').style.display = 'none';
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+
+                const result = await response.json();
+                isTrueSummary = Math.random() < 0.5;
+
+                document.getElementById('news_summary').textContent = isTrueSummary ? result.real_summary : result.fake_summary;
+            } catch (error) {
+                console.error('Error fetching summary:', error);
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+
+        let isSpeaking = false; 
+        let utterance = null;
+
+        function speakText(selector, isClass = false) {
+            if (isSpeaking) {
+                window.speechSynthesis.cancel(); // Stop speech
+                isSpeaking = false;
+                return;
+            }
+
+            let text;
+            if (isClass) {
+                let elements = document.getElementsByClassName(selector);
+                text = Array.from(elements).map(el => el.innerText).join(" ");
+            } else {
+                let element = document.getElementById(selector);
+                text = element ? element.innerText : "";
+            }
+
+            if (text.trim() === "") {
+                alert("No text found!");
+                return;
+            }
+
+            utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "en-US";
+            utterance.rate = 1;
+            utterance.pitch = 1;
+            utterance.onend = () => isSpeaking = false; // Reset flag when done
+
+            window.speechSynthesis.speak(utterance);
+            isSpeaking = true;
+        }
+
+        async function checkAnswer(userThinksTrue) {
+            document.querySelectorAll('.btn').forEach(btn => btn.disabled = true);
+
+            try {
+                const response = await fetch('/submit-answer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        selectedPosition: userThinksTrue ? 1 : 2,
+                        correctFakePosition: isTrueSummary ? 1 : 2
+                    })
+                });
+
+                const result = await response.json();
+                /// Fix this issue in this format.
+                console.log("Is correct: ", result.correct)
+                if (result.correct) {
+                    fetchGeneratedSummary(); // Load new question if correct
+                } else {
+                    document.getElementById('explanationText').textContent = "Incorrect! " + result.explanation;
+                    document.getElementById('explanationText').style.display = 'block';
+                    document.getElementById('nextButton').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error submitting answer:', error);
+            }
+        }
+    </script>
+</body>
+</html>

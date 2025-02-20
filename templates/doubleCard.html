@@ -80,25 +80,28 @@
     </div>
 
     <div class="container">
-        <div class="news-card" id="news1">
+        <div class="news-card" id="news1" onclick="checkAnswer(1)">
             <h3>Summary 1</h3>
             <p class="summary" id="news_summary_1">Loading...</p>
             <button onclick="speakText('news_summary_1')">Read Text</button>
         </div>
         
-        <div class="news-card" id="news2">
+        <div class="news-card" id="news2" onclick="checkAnswer(2)">
             <h3>Summary 2</h3>
             <p class="summary" id="news_summary_2">Loading...</p>
             <button onclick="speakText('news_summary_2')">Read Text</button>
         </div>
     </div>
 
+    <p id="explanationText" style="display: none; text-align: center; font-weight: bold; color: red;"></p>
+    <button id="nextButton" style="display: none; margin: 0 auto; display: block;" onclick="fetchGeneratedSummaries()">Next Question</button>
+
     <div class="loader" id="loader"></div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             fetchGeneratedSummaries();
-            setupClickHandlers();
+            //setupClickHandlers();
         });
 
         let correctFakePosition;
@@ -106,19 +109,22 @@
         async function fetchGeneratedSummaries() {
             document.getElementById('loader').style.display = 'block';
 
+            // Reset explanation and hide "Next Question" button
+            document.getElementById('explanationText').textContent = "";
+            document.getElementById('explanationText').style.display = 'none';
+            document.getElementById('nextButton').style.display = 'none';
+
+            // Re-enable selection for the new question
+            document.getElementById('news1').style.pointerEvents = 'auto';
+            document.getElementById('news2').style.pointerEvents = 'auto';
+
             try {
                 const response = await fetch('/generate', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        //news_article: "A major scientific breakthrough in renewable energy was announced today.",
-                        //difficulty: 3  // Can be randomized or user-defined
-                    })
                 });
-
-                //// We donot use the above body at all as the data about the user is on the flask server. 
 
                 const result = await response.json();
 
@@ -126,11 +132,11 @@
                 if (randomOrder) {
                     document.getElementById('news_summary_1').textContent = result.real_summary;
                     document.getElementById('news_summary_2').textContent = result.fake_summary;
-                    correctFakePosition = 2;  // Fake summary is in the second position
+                    correctFakePosition = 2;
                 } else {
                     document.getElementById('news_summary_1').textContent = result.fake_summary;
                     document.getElementById('news_summary_2').textContent = result.real_summary;
-                    correctFakePosition = 1;  // Fake summary is in the first position
+                    correctFakePosition = 1;
                 }
 
             } catch (error) {
@@ -139,6 +145,7 @@
                 document.getElementById('loader').style.display = 'none';
             }
         }
+
 
         let isSpeaking = false; 
         let utterance = null;
@@ -185,6 +192,7 @@
             document.getElementById('news2').addEventListener('click', () => sendClickData(2));
         }
 
+        // Debug functions remove affter testing
         async function sendClickData(selectedNews) {
             try {
                 console.log("Fake:", correctFakePosition);
@@ -205,6 +213,40 @@
 
             } catch (error) {
                 console.error('Error sending click data:', error);
+            }
+        }
+
+        // send answer if correct and get back the wonderful explanation from over AI overlords.
+        async function checkAnswer(selectedPosition) {
+            // Disable both summary selections after a choice is made
+            document.getElementById('news1').style.pointerEvents = 'none';
+            document.getElementById('news2').style.pointerEvents = 'none';
+
+            try {
+                const response = await fetch('/submit-answer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        selectedPosition: selectedPosition,
+                        correctFakePosition: correctFakePosition
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.correct) {
+                    fetchGeneratedSummaries(); // Automatically load new question if correct
+                } else {
+                    // Show explanation and enable the "Next Question" button
+                    document.getElementById('explanationText').textContent = "Incorrect! " + result.explanation;
+                    document.getElementById('explanationText').style.display = 'block';
+                    document.getElementById('nextButton').style.display = 'block';
+                }
+
+            } catch (error) {
+                console.error('Error submitting answer:', error);
             }
         }
     </script>
