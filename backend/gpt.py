@@ -8,7 +8,7 @@ from mockResponses import get_mock_response
 # Load OpenAI API Key
 #python -c "import os; print(os.getenv('OPENAI_API_KEY'))"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-openai.api_key = OPENAI_API_KEY
+openai.api_key = "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"
 ### API KEY ###
 ### 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 ###
 

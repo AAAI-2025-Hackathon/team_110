@@ -5,9 +5,9 @@ import uuid
 from datetime import datetime
 
 class MongoDBHandler:
-    def __init__(self, db_name: str, host: str = "localhost", port: int = 27017):
+    def __init__(self, uri: str, db_name: str):
         """Initialize MongoDB connection"""
-        self.client = MongoClient(host, port)
+        self.client = MongoClient(uri)  # Use the full URI
         self.db = self.client[db_name]
     
     def insert(self, collection: str, data: dict) -> str:

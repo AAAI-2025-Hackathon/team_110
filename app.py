@@ -5,8 +5,7 @@ from utils.db import MongoDBHandler, Story, Session
 from backend.gpt import generate_summaries, MISINFO_CAT, TOPIC_CAT
 import random, time, os, json
 from apscheduler.schedulers.background import BackgroundScheduler
-
-
+from urllib.parse import urlparse
 
 ## Add the ability to automatically store those reponses that fooled the humans.
 ## Add event listener in GPT code to auto retrain after it reaches 50 or so new responses. ### Very important. 
@@ -17,7 +16,15 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 ## Initialize the Mongo DB handler
-db_handler = MongoDBHandler("mongo_news", "localhost", 27017)
+#### ENV variable looks like mongodb://localhost:27017/mydatabase
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/mydatabase")
+parsed_uri = urlparse(MONGO_URI)
+mongo_host = parsed_uri.hostname  # Extracts hostname or IP
+mongo_port = parsed_uri.port      # Extracts port
+mongo_database = parsed_uri.path.strip("/")  # Extracts database name
+print("[INFO] MONGODB URI:", MONGO_URI)
+#db_handler = MongoDBHandler("mongo_news", mongo_host, mongo_port)
+db_handler = MongoDBHandler(MONGO_URI, "mongo_news")
 
 ## Home page
 @app.route('/')
@@ -103,7 +110,7 @@ def generate():
         
         ## With a small propbability always try and generate new and exciting fake stories.
         print("[INFO] User has not seen stories count:",len(unseen_stories))
-        if len(unseen_stories) > 0:
+        if len(unseen_stories) > 0 and random.random() > 0.9: ## Try and force new generations of stories now
             print("[INFO] Reusing an exsisting story")
             unseen_story = make_serializable(unseen_stories[0])
             ###print(unseen_story)
@@ -113,12 +120,9 @@ def generate():
             ## Have a function to generate a new input_json by looking at the user data. If the user selects a particular type 
             ## focus on those. Not always one just a single one.
             input_json = {
-                "topic": "Science",
-                "manipulation_methods": [
-                    "Basic factual inaccuracies",
-                    "Causation vs Correlation confusion",
-                    "Bad math/Incorrect science"
-                ]
+                "topic": random.choice(TOPIC_CAT),
+                "manipulation_methods": 
+                    random.sample(MISINFO_CAT, 2)
             }
             result = generate_summaries(input_json)
             
@@ -280,6 +284,6 @@ scheduler.start()
 
 if __name__ == '__main__':
     try:
-        app.run(debug=True, use_reloader=False)
+        app.run(host="0.0.0.0", debug=True, use_reloader=False)
     except (KeyboardInterrupt, SystemError, SystemExit):
         scheduler.shutdown()

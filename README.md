@@ -28,6 +28,12 @@ pip install requirments.txt
 python app.py -d
 docker run -d --name mongo_news -p 27017:27017 -v mongo_data:/data/db mongo
 
+### TO RUN ON FLY.io
+
+flyctl launch
+flyctl secrets set MONGO_URI="mongodb://root:mongodbpassword@mongodb.internal:27017/mydatabase"
+flyctl secrets set OPENAI_API_KEY="yourKey"
+flyctl deploy
 
 ## DONE
 * Fine tuned the model with 150 examples. 
@@ -45,3 +51,15 @@ docker run -d --name mongo_news -p 27017:27017 -v mongo_data:/data/db mongo
 #### OIIII I got it deployed... dont change the docker files it was a pina to get it
 * it is on https://team-110-bitter-water-5933.fly.dev/
 * run just flyctl launch to get it deployed. Change names tomorrow 
+
+
+
+### MONGO CREDS
+* cQ7juGaynla0mhbZ
+* sdnmvhbdejkvguy
+
+*dbUser
+*dbPass
+
+
+mongodb+srv://dbUser:dbPass@cluster0.cdvas.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
