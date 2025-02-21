@@ -23,8 +23,20 @@
 
 ## Architecture
 
+### TOO RUN LOCALLY
+pip install requirments.txt
+python app.py -d
+docker run -d --name mongo_news -p 27017:27017 -v mongo_data:/data/db mongo
+
+
+## DONE
+* Fine tuned the model with 150 examples. 
+* Deployed on fly.io should be up and running by Friday morning
+* Need to collect more data and fine tune over the weekend.
+
 ## TODO
-* Collect the data and finalize the requirments for the model.
+
 * Finish fine tuning the AI models.
-* Integrate AI model in to the code.
 * Track the user and see their shortcommings and focus on those to trick them further.
+* Also add pictures to make it more interactive and fun to read.
+* If possible change the voice of the naration to make it sound more real. 

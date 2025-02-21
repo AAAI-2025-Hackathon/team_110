@@ -94,7 +94,9 @@
     </div>
 
     <p id="explanationText" style="display: none; text-align: center; font-weight: bold; color: red;"></p>
-    <button id="nextButton" style="display: none; margin: 0 auto; display: block;" onclick="fetchGeneratedSummaries()">Next Question</button>
+    <!-- <button id="nextButton" style="display: none; margin: 0 auto; display: block;" onclick="fetchGeneratedSummaries()">Next Question</button> -->
+    <button id="nextButton" style="display: none; margin: 0 auto; display: block;" onclick="postNewQuestion()">Next Question</button>
+
 
     <div class="loader" id="loader"></div>
 
@@ -105,6 +107,7 @@
         });
 
         let correctFakePosition;
+        let current_story_id; 
 
         async function fetchGeneratedSummaries() {
             document.getElementById('loader').style.display = 'block';
@@ -138,6 +141,7 @@
                     document.getElementById('news_summary_2').textContent = result.real_summary;
                     correctFakePosition = 1;
                 }
+                current_story_id = result._id
 
             } catch (error) {
                 console.error('Error fetching summaries:', error);
@@ -192,36 +196,8 @@
             document.getElementById('news2').addEventListener('click', () => sendClickData(2));
         }
 
-        // Debug functions remove affter testing
-        async function sendClickData(selectedNews) {
-            try {
-                console.log("Fake:", correctFakePosition);
-                console.log("Clicked:", selectedNews);
-                const response = await fetch('/log-click', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        selected_news: selectedNews,
-                        correct_fake_position: correctFakePosition
-                    })
-                });
-
-                const result = await response.json();
-                console.log(result.message);  // Logs response from Flask
-
-            } catch (error) {
-                console.error('Error sending click data:', error);
-            }
-        }
-
         // send answer if correct and get back the wonderful explanation from over AI overlords.
         async function checkAnswer(selectedPosition) {
-            // Disable both summary selections after a choice is made
-            document.getElementById('news1').style.pointerEvents = 'none';
-            document.getElementById('news2').style.pointerEvents = 'none';
-
             try {
                 const response = await fetch('/submit-answer', {
                     method: 'POST',
@@ -230,25 +206,47 @@
                     },
                     body: JSON.stringify({
                         selectedPosition: selectedPosition,
-                        correctFakePosition: correctFakePosition
+                        correctFakePosition: correctFakePosition,
+                        story_id: current_story_id // Ensure this is set when fetching the story
                     })
                 });
 
                 const result = await response.json();
 
                 if (result.correct) {
-                    fetchGeneratedSummaries(); // Automatically load new question if correct
+                    document.getElementById('explanationText').textContent = "Correct!"
+                    // fetchGeneratedSummaries(); // Automatically load new question if correct
                 } else {
                     // Show explanation and enable the "Next Question" button
                     document.getElementById('explanationText').textContent = "Incorrect! " + result.explanation;
-                    document.getElementById('explanationText').style.display = 'block';
-                    document.getElementById('nextButton').style.display = 'block';
                 }
-
+                document.getElementById('explanationText').style.display = 'block';
+                document.getElementById('nextButton').style.display = 'block'
             } catch (error) {
                 console.error('Error submitting answer:', error);
             }
         }
+
+        function postNewQuestion() {
+            // Create a form dynamically
+            let form = document.createElement("form");
+            form.method = "POST";
+            form.action = "./new_question";
+
+            // Ensure cookies are included (handled automatically in browsers)
+            form.style.display = "none";  // Hide the form
+
+            // Optional: Add hidden fields if needed (e.g., story_id)
+            let storyIdInput = document.createElement("input");
+            storyIdInput.type = "hidden";
+            storyIdInput.name = "story_id";
+            storyIdInput.value = current_story_id;  // Ensure this variable exists
+            form.appendChild(storyIdInput);
+
+            document.body.appendChild(form);
+            form.submit();  // Submit the form
+        }
+
     </script>
 </body>
 </html>

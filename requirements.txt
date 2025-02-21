@@ -1,0 +1,7 @@
+apscheduler
+openai==0.28
+flask
+uuid
+bson
+pymongo
+typing

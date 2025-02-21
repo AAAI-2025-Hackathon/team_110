@@ -93,8 +93,8 @@
 </head>
 <body>
     <div class="header">
-        <h1>Truth Detector Challenge</h1>
-        <p>Can you determine if the news is real or fake?</p>
+        <h1>Spot the Fake News</h1>
+        <p>Test your media literacy skills - Identify the misleading story</p>
     </div>
 
     <div class="news-card">
@@ -109,7 +109,7 @@
     </div>
 
     <p id="explanationText" style="display: none; font-weight: bold; color: red;"></p>
-    <button id="nextButton" style="display: none; margin-top: 20px;" onclick="fetchGeneratedSummary()">Next Question</button>
+    <button id="nextButton" style="display: none; margin: 0 auto; display: block;" onclick="postNewQuestion()">Next Question</button>
 
     <div class="loader" id="loader"></div>
 
@@ -119,6 +119,7 @@
         });
 
         let isTrueSummary;
+        let current_story_id; 
 
         async function fetchGeneratedSummary() {
             document.getElementById('loader').style.display = 'block';
@@ -133,6 +134,7 @@
 
                 const result = await response.json();
                 isTrueSummary = Math.random() < 0.5;
+                current_story_id = result._id
 
                 document.getElementById('news_summary').textContent = isTrueSummary ? result.real_summary : result.fake_summary;
             } catch (error) {
@@ -176,9 +178,8 @@
             isSpeaking = true;
         }
 
-        async function checkAnswer(userThinksTrue) {
-            document.querySelectorAll('.btn').forEach(btn => btn.disabled = true);
 
+        async function checkAnswer(userThinksTrue) {
             try {
                 const response = await fetch('/submit-answer', {
                     method: 'POST',
@@ -187,23 +188,45 @@
                     },
                     body: JSON.stringify({
                         selectedPosition: userThinksTrue ? 1 : 2,
-                        correctFakePosition: isTrueSummary ? 1 : 2
+                        correctFakePosition: isTrueSummary ? 1 : 2,
+                        story_id: current_story_id
                     })
                 });
 
                 const result = await response.json();
-                /// Fix this issue in this format.
-                console.log("Is correct: ", result.correct)
+
                 if (result.correct) {
-                    fetchGeneratedSummary(); // Load new question if correct
+                    document.getElementById('explanationText').textContent = "Correct!"
+                    // fetchGeneratedSummaries(); // Automatically load new question if correct
                 } else {
+                    // Show explanation and enable the "Next Question" button
                     document.getElementById('explanationText').textContent = "Incorrect! " + result.explanation;
-                    document.getElementById('explanationText').style.display = 'block';
-                    document.getElementById('nextButton').style.display = 'block';
                 }
+                document.getElementById('explanationText').style.display = 'block';
+                document.getElementById('nextButton').style.display = 'block';
             } catch (error) {
                 console.error('Error submitting answer:', error);
             }
+        }
+
+        function postNewQuestion() {
+            // Create a form dynamically
+            let form = document.createElement("form");
+            form.method = "POST";
+            form.action = "./new_question";
+
+            // Ensure cookies are included (handled automatically in browsers)
+            form.style.display = "none";  // Hide the form
+
+            // Optional: Add hidden fields if needed (e.g., story_id)
+            let storyIdInput = document.createElement("input");
+            storyIdInput.type = "hidden";
+            storyIdInput.name = "story_id";
+            storyIdInput.value = current_story_id;  // Ensure this variable exists
+            form.appendChild(storyIdInput);
+
+            document.body.appendChild(form);
+            form.submit();  // Submit the form
         }
     </script>
 </body>
