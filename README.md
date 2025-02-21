@@ -40,3 +40,8 @@ docker run -d --name mongo_news -p 27017:27017 -v mongo_data:/data/db mongo
 * Track the user and see their shortcommings and focus on those to trick them further.
 * Also add pictures to make it more interactive and fun to read.
 * If possible change the voice of the naration to make it sound more real. 
+
+
+#### OIIII I got it deployed... dont change the docker files it was a pina to get it
+* it is on https://team-110-bitter-water-5933.fly.dev/
+* run just flyctl launch to get it deployed. Change names tomorrow 

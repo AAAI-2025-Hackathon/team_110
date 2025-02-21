@@ -17,3 +17,15 @@
 **\lib
 **\lib64
 fly.toml
+
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env
+*.log
+*.sqlite3
+.DS_Store
+.git/

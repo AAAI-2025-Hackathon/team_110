@@ -1,7 +1,5 @@
 apscheduler
 openai==0.28
-flask
-uuid
-bson
-pymongo
-typing
+flask==2.2.5
+pymongo==4.5.0
+gunicorn
