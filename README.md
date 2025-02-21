@@ -37,22 +37,17 @@ flyctl deploy
 
 ## DONE
 * Fine tuned the model with 150 examples. 
-* Deployed on fly.io should be up and running by Friday morning
-* Need to collect more data and fine tune over the weekend.
+* Deployed on render should be up and running by Friday morning
+* 126 traning examples of stories that have a 60% trick rate have been stored. 
+* New model fine tuned with the above dataset has been deployed. (Cause to switch to new service)
+* Prod is live at https://aaai-hackathon.onrender.com/ 
 
 ## TODO
 
-* Finish fine tuning the AI models.
+* Finish fine tuning the AI models. (Currently on generation 2). Hope to have atleast 4 gneraations of the trained model. 
 * Track the user and see their shortcommings and focus on those to trick them further.
 * Also add pictures to make it more interactive and fun to read.
 * If possible change the voice of the naration to make it sound more real. 
-
-
-#### OIIII I got it deployed... dont change the docker files it was a pina to get it
-* it is on https://team-110-bitter-water-5933.fly.dev/
-* run just flyctl launch to get it deployed. Change names tomorrow 
-
-
 
 ### MONGO CREDS
 * cQ7juGaynla0mhbZ
@@ -63,3 +58,6 @@ flyctl deploy
 
 
 mongodb+srv://dbUser:dbPass@cluster0.cdvas.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+
+### Hosted on render
+* Its live at https://aaai-hackathon.onrender.com/login/email
