@@ -110,6 +110,13 @@
         let correctFakePosition;
         let current_story_id; 
 
+        let isSpeaking = false; 
+        let utterance = null;
+        let selectedVoice = null;
+
+        let randomAccent = null;
+        let convincingness = null;
+
         async function fetchGeneratedSummaries() {
             document.getElementById('loader').style.display = 'block';
 
@@ -131,7 +138,8 @@
                 });
 
                 const result = await response.json();
-
+                randomAccent = result.use_accent;
+                convincingness = result.use_convincingness;
                 const randomOrder = Math.random() < 0.5;
                 if (randomOrder) {
                     document.getElementById('news_summary_1').textContent = result.real_summary;
@@ -151,18 +159,10 @@
             }
         }
 
-
-        let isSpeaking = false; 
-        let utterance = null;
-        let selectedVoice = null;
-
-        let randomAccent = null;
-        let convincingness = null;
-
-        // List of predefined convincing accents
+        // List of predefined convincing accents same as that is nthe pthon code
         const ACCENTS = ["en-US", "en-GB", "en-IN", "en-AU", "en-CA"]; // Add more if needed
 
-        // Levels of convincingness (pitch & rate combinations)
+        // I read a paper on this syit and this is waht i think, i fudged the valuesa bit tho
         const CONVINCINGNESS_LEVELS = [
             { rate: 0.9, pitch: 1.2 },  // Deep and slow
             { rate: 1.0, pitch: 1.0 },  // Neutral
@@ -204,9 +204,14 @@
 
             utterance = new SpeechSynthesisUtterance(text);
 
-            // Randomly select an accent
-            randomAccent = ACCENTS[Math.floor(Math.random() * ACCENTS.length)];
-            convincingness = CONVINCINGNESS_LEVELS[Math.floor(Math.random() * CONVINCINGNESS_LEVELS.length)];
+            // Randomly select an accent if not selected by backend
+            if (randomAccent === null) {
+                randomAccent = ACCENTS[Math.floor(Math.random() * ACCENTS.length)];
+            }
+
+            if (convincingness === null) {
+                convincingness = CONVINCINGNESS_LEVELS[Math.floor(Math.random() * CONVINCINGNESS_LEVELS.length)];
+            }
             utterance.rate = convincingness.rate;  
             utterance.pitch = convincingness.pitch;
 
@@ -247,7 +252,9 @@
                     body: JSON.stringify({
                         selectedPosition: selectedPosition,
                         correctFakePosition: correctFakePosition,
-                        story_id: current_story_id // Ensure this is set when fetching the story
+                        story_id: current_story_id, // Ensure this is set when fetching the story
+                        randomAccent: randomAccent,
+                        convincingness: convincingness
                     })
                 });
 

@@ -122,7 +122,12 @@
 
 
         let isTrueSummary;
-        let current_story_id; 
+        let current_story_id;
+        let isSpeaking = false; 
+        let utterance = null;
+        let selectedVoice = null; 
+        let randomAccent = null;
+        let convincingness = null;
 
         async function fetchGeneratedSummary() {
             document.getElementById('loader').style.display = 'block';
@@ -136,6 +141,9 @@
                 });
 
                 const result = await response.json();
+                randomAccent = result.use_accent;
+                convincingness = result.use_convincingness;
+
                 isTrueSummary = Math.random() < 0.5;
                 current_story_id = result._id
 
@@ -147,12 +155,6 @@
             }
         }
 
-        let isSpeaking = false; 
-        let utterance = null;
-        let selectedVoice = null;
-
-        let randomAccent = null;
-        let convincingness = null;
 
         // List of predefined convincing accents
         const ACCENTS = ["en-US", "en-GB", "en-IN", "en-AU", "en-CA"]; // Add more if needed
@@ -200,8 +202,14 @@
             utterance = new SpeechSynthesisUtterance(text);
 
             // Randomly select an accent
-            randomAccent = ACCENTS[Math.floor(Math.random() * ACCENTS.length)];
-            convincingness = CONVINCINGNESS_LEVELS[Math.floor(Math.random() * CONVINCINGNESS_LEVELS.length)];
+            // Randomly select an accent if not selected by backend
+            if (randomAccent === null) {
+                randomAccent = ACCENTS[Math.floor(Math.random() * ACCENTS.length)];
+            }
+
+            if (convincingness === null) {
+                convincingness = CONVINCINGNESS_LEVELS[Math.floor(Math.random() * CONVINCINGNESS_LEVELS.length)];
+            }
             utterance.rate = convincingness.rate;  
             utterance.pitch = convincingness.pitch;
 
@@ -231,7 +239,9 @@
                     body: JSON.stringify({
                         selectedPosition: userThinksTrue ? 1 : 2,
                         correctFakePosition: isTrueSummary ? 1 : 2,
-                        story_id: current_story_id
+                        story_id: current_story_id,
+                        randomAccent: randomAccent,
+                        convincingness: convincingness
                     })
                 });
 

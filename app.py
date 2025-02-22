@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, make_response, redir
 from config import Config
 from utils.helpers import create_user_session, make_serializable
 from utils.db import MongoDBHandler, Story, Session
+from utils.ucb import ACCENTS, CONVINCINGNESS_LEVELS, initialize_tags, select_next_accent_and_convincingness, update_tags
 from backend.gpt import generate_summaries, MISINFO_CAT, TOPIC_CAT
 import random, time, os, json
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -108,12 +109,16 @@ def generate():
         available_stories = db_handler.find_by_query("stories_database", {})
         unseen_stories = [story for story in available_stories if str(story["_id"]) not in seen_stories]
         
+        next_accent, next_convincingness = select_next_accent_and_convincingness(user_session["metrics"]["tags"])
+
         ## With a small propbability always try and generate new and exciting fake stories.
         print("[INFO] User has not seen stories count:",len(unseen_stories))
         if len(unseen_stories) > 0 and random.random() > 0.9: ## Try and force new generations of stories now
             print("[INFO] Reusing an exsisting story")
             unseen_story = make_serializable(unseen_stories[0])
             ###print(unseen_story)
+            unseen_story["use_accent"] = next_convincingness
+            unseen_story["use_convincingness"] = next_accent
             return jsonify(unseen_story)
         else:
             print("[INFO] Creating a new story")
@@ -136,6 +141,8 @@ def generate():
             }
             story_id = db_handler.insert("stories_database", new_story)
             new_story["_id"] = story_id
+            new_story["use_accent"] = next_convincingness
+            new_story["use_convincingness"] = next_accent
             return jsonify(new_story)
     else:
         print("[INFO] Unknown user cannot give personalized stuff")
@@ -159,6 +166,8 @@ def generate():
         }
         story_id = db_handler.insert("stories_database", new_story)
         new_story["_id"] = story_id
+        new_story["use_accent"] = next_convincingness
+        new_story["use_convincingness"] = next_accent
         return jsonify(new_story)
 
 
@@ -173,6 +182,9 @@ def submit_answer():
         selected_position = data.get('selectedPosition')
         correct_fake_position = data.get("correctFakePosition")
         story_id = data.get("story_id")
+
+        currentAccent = data.get("randomAccent", None)
+        currentConvincingness = data.get("convincingness", None)
         
         if not story_id:
             return jsonify({"error": "Missing story ID"}), 400
@@ -194,13 +206,16 @@ def submit_answer():
         user_session.metrics["score"] += 100 if correct else 0
         user_session.metrics["history"].append({"story_id": story_id, "correct": correct})
         
+        update_tags(user_session["metrics"]["tags"], currentAccent, currentConvincingness, not correct)
+        user_session.save()
+
         if not db_handler.update("session_db", user_session._id, {"metrics": user_session.metrics}):
             return jsonify({"error": "Failed to update session"}), 500
         
         story_data["num_occurances"] = story_data.get("num_occurances", 0) + 1
         if correct:
             story_data["num_success"] = story_data.get("num_success", 0) + 1
-        
+
         if not db_handler.update("stories_database", story_id, story_data):
             return jsonify({"error": "Failed to update story"}), 500
         

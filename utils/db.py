@@ -110,13 +110,15 @@ class Session:
         self.email = email
         self.metrics = metrics
         self._id: Optional[str] = None
+        self.tags = dict()
 
     def save(self):
         """Save or update the session in the database."""
         data = {
             "session_id": self.session_id,
             "email": self.email,
-            "metrics": self.metrics
+            "metrics": self.metrics,
+            "tags": self.tags
         }
         if self._id:
             self.db_handler.update("session_db", self._id, data)
@@ -132,7 +134,8 @@ class Session:
                 db_handler,
                 session_id=data["session_id"],
                 email=data["email"],
-                metrics=data["metrics"]
+                metrics=data["metrics"],
+                tags=data["tags"]
             )
             session._id = str(data["_id"])
             return session
@@ -148,7 +151,8 @@ class Session:
                 db_handler,
                 session_id=data["session_id"],
                 email=data["email"],
-                metrics=data["metrics"]
+                metrics=data["metrics"],
+                tags=data["tags"]
             )
             session._id = str(data["_id"])
             sessions.append(session)
@@ -166,7 +170,8 @@ class Session:
                 'correct': 0,
                 'incorrect': 0,
                 'avg_response_time': 0,
-                'history': []
+                'history': [],
+                'tags': dict()
             }
         }
         session = cls(db_handler, session_id=session_data['session_id'], email=session_data['email'], metrics=session_data['metrics'])
