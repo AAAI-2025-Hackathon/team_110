@@ -117,6 +117,9 @@
         document.addEventListener("DOMContentLoaded", () => {
             fetchGeneratedSummary();
         });
+        // Ensure voices are loaded properly
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+
 
         let isTrueSummary;
         let current_story_id; 
@@ -146,6 +149,32 @@
 
         let isSpeaking = false; 
         let utterance = null;
+        let selectedVoice = null;
+
+        let randomAccent = null;
+        let convincingness = null;
+
+        // List of predefined convincing accents
+        const ACCENTS = ["en-US", "en-GB", "en-IN", "en-AU", "en-CA"]; // Add more if needed
+
+        // Levels of convincingness (pitch & rate combinations)
+        const CONVINCINGNESS_LEVELS = [
+            { rate: 0.9, pitch: 1.2 },  // Deep and slow
+            { rate: 1.0, pitch: 1.0 },  // Neutral
+            { rate: 1.1, pitch: 0.9 },  // Slightly persuasive
+            { rate: 1.2, pitch: 0.8 },  // Faster and authoritative
+        ];
+
+        // Load voices when they are ready
+        function loadVoices() {
+            let voices = window.speechSynthesis.getVoices();
+            let preferredVoices = voices.filter(voice =>
+                voice.name.includes("Google") || voice.name.includes("Microsoft") || voice.localService
+            );
+
+            // Pick a default voice
+            selectedVoice = preferredVoices.length ? preferredVoices[0] : voices[0];
+        }
 
         function speakText(selector, isClass = false) {
             if (isSpeaking) {
@@ -169,11 +198,24 @@
             }
 
             utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = "en-US";
-            utterance.rate = 1;
-            utterance.pitch = 1;
-            utterance.onend = () => isSpeaking = false; // Reset flag when done
 
+            // Randomly select an accent
+            randomAccent = ACCENTS[Math.floor(Math.random() * ACCENTS.length)];
+            convincingness = CONVINCINGNESS_LEVELS[Math.floor(Math.random() * CONVINCINGNESS_LEVELS.length)];
+            utterance.rate = convincingness.rate;  
+            utterance.pitch = convincingness.pitch;
+
+            // Try to find a voice matching the chosen accent
+            let voices = window.speechSynthesis.getVoices();
+            let accentVoice = voices.find(voice => voice.lang.includes(randomAccent));
+
+            if (accentVoice) {
+                utterance.voice = accentVoice;
+            } else if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+
+            utterance.onend = () => isSpeaking = false; // Reset flag when done
             window.speechSynthesis.speak(utterance);
             isSpeaking = true;
         }

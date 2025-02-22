@@ -61,3 +61,10 @@ mongodb+srv://dbUser:dbPass@cluster0.cdvas.mongodb.net/?retryWrites=true&w=major
 
 ### Hosted on render
 * Its live at https://aaai-hackathon.onrender.com/login/email
+
+
+### SOME TUINING STUFF
+* GEN 0 was not fine tuned
+* GEN 1 was tuned with ~60 good examples
+* GEN 2 was tuned with data that perfomred well ~150
+* GEN 3 and 4 expected to reach around ~500

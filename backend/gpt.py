@@ -51,11 +51,22 @@ def generate_summaries(input_data):
 
     # Convert input data to a formatted string
     prompt = f"""
-    Generate a fake and real summary of a story or an event related to "{input_data['topic']}". 
-    Both summaries must argue for the same fact but one must be factually incorrect. 
-    Name-drop institutions for credibility. The fake summary should manipulate facts using:
-    {", ".join(input_data["manipulation_methods"])}.
-    """
+        Generate a fake and real summary of a story or an event related to "{input_data['topic']}". 
+        Both summaries must argue for the same fact but one must be factually incorrect. 
+        The fake summary should use the following manipulation techniques: {", ".join(input_data["manipulation_methods"])}. 
+
+        Ensure that:
+        - If the fake summary appears credible, set the real summary as an empty string.
+        - If the real summary appears too fake or unbelievable, set the fake summary as an empty string.
+
+        Use institutions and references to add credibility where appropriate.
+        Additionally, provide an explanation of how the fake summary misleads.
+
+    For example:
+        "fake_summary": "Plasma Kinetics, a US-based startup, claims it can capture hydrogen gas from the exhaust of incinerators and shipping vehicles. Their patented technology stores hydrogen in a thin film for easy transport, allowing later extraction for energy production. Independent studies have confirmed their breakthrough, and the company is set for mass production.",
+        "real_summary": "Plasma Kinetics is developing a hydrogen storage solution but does not capture hydrogen from exhaust gases. Their technology involves solid-state hydrogen storage in a film, improving transportation efficiency. While promising, it has yet to achieve large-scale adoption due to high production costs and energy conversion losses.",
+        "explanation": "Plasma Kinetics does not extract hydrogen from waste gases but focuses on storage. While their approach could enhance hydrogen distribution, its real-world feasibility remains uncertain due to cost and efficiency concerns. Claims of independent verification are overstated, as the technology is still in early testing stages."
+        """
 
     # Call OpenAI API with function calling
     response = openai.ChatCompletion.create(
