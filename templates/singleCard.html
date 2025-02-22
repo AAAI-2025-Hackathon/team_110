@@ -95,6 +95,8 @@
     <div class="header">
         <h1>Spot the Fake News</h1>
         <p>Test your media literacy skills - Identify the misleading story</p>
+        <p><strong>Name:</strong> <span id="userName">Loading...</span></p>
+        <p><strong>Score:</strong> <span id="userScore">0</span></p>
     </div>
 
     <div class="news-card">
@@ -280,6 +282,36 @@
             document.body.appendChild(form);
             form.submit();  // Submit the form
         }
+
+        async function updateUserInfo() {
+            try {
+                const response = await fetch('/get-name-score', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'  // Remove if causes issues
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error("Error:", data.error);
+                    document.getElementById("userName").textContent = "Guest";
+                    document.getElementById("userScore").textContent = "0";
+                } else {
+                    document.getElementById("userName").textContent = data.name;
+                    document.getElementById("userScore").textContent = data.score;
+                }
+            } catch (error) {
+                console.error("Error fetching user info:", error);
+                document.getElementById("userName").textContent = "Guest";
+                document.getElementById("userScore").textContent = "0";
+            }
+        }
+
+        // Call it on page load
+        document.addEventListener("DOMContentLoaded", updateUserInfo);
     </script>
 </body>
 </html>

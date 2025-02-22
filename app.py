@@ -83,7 +83,6 @@ def login_guest():
     #print(existing_session)
     
     if len(existing_session) > 0:
-        print("[INFO] Returning guest user has no coockie go back to login") 
         user_session = existing_session[0]
     else:
         print("[INFO] New guest user has no coockie go back to login") 
@@ -96,6 +95,27 @@ def login_guest():
         max_age=app.config['PERMANENT_SESSION_LIFETIME'].seconds
     )
     return resp
+
+@app.route('/get-name-score', methods=['POST', 'GET'])
+def getNameScore():
+    session_id = request.cookies.get(app.config['SESSION_COOKIE_NAME'])
+
+    if not session_id:
+        return jsonify({"error": "Session ID not found"}), 400
+
+    existing_session = Session.search(db_handler, {"session_id": session_id})
+
+    if existing_session and len(existing_session) > 0:
+        user_session = existing_session[0]
+        user_email = user_session.get("email", "Guest")  # Default to 'Guest' if email not found
+        user_score = user_session.get("metrics", {}).get("score", 0)  # Default to 0 if score missing
+
+        # Extract only the part before '@' as the username
+        user_name = user_email.split('@')[0] if "@" in user_email else user_email
+
+        return jsonify({"name": user_name, "score": user_score})
+    
+    return jsonify({"error": "Session not found"}), 403  # Forbidden if no session found
 
 @app.route('/generate', methods=['POST'])
 def generate():
