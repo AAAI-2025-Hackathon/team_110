@@ -107,8 +107,9 @@ def getNameScore():
 
     if existing_session and len(existing_session) > 0:
         user_session = existing_session[0]
-        user_email = user_session.get("email", "Guest")  # Default to 'Guest' if email not found
-        user_score = user_session.get("metrics", {}).get("score", 0)  # Default to 0 if score missing
+        user_email = user_session.email if user_session.email != "" else "Guest"
+        user_score = user_session.metrics.get("score", 0)
+        #user_score = user_session.get("metrics", {}).get("score", 0)  # Default to 0 if score missing
 
         # Extract only the part before '@' as the username
         user_name = user_email.split('@')[0] if "@" in user_email else user_email
@@ -129,7 +130,7 @@ def generate():
         available_stories = db_handler.find_by_query("stories_database", {})
         unseen_stories = [story for story in available_stories if str(story["_id"]) not in seen_stories]
         
-        next_accent, next_convincingness = select_next_accent_and_convincingness(user_session["metrics"]["tags"])
+        next_accent, next_convincingness = select_next_accent_and_convincingness(user_session.tags)
 
         ## With a small propbability always try and generate new and exciting fake stories.
         print("[INFO] User has not seen stories count:",len(unseen_stories))
@@ -226,7 +227,7 @@ def submit_answer():
         user_session.metrics["score"] += 100 if correct else 0
         user_session.metrics["history"].append({"story_id": story_id, "correct": correct})
         
-        update_tags(user_session["metrics"]["tags"], currentAccent, currentConvincingness, not correct)
+        update_tags(user_session.tags, currentAccent, currentConvincingness, not correct)
         user_session.save()
 
         if not db_handler.update("session_db", user_session._id, {"metrics": user_session.metrics}):

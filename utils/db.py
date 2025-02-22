@@ -104,7 +104,7 @@ class Story:
 
 
 class Session:
-    def __init__(self, db_handler: MongoDBHandler, session_id: str, email: str, metrics: Dict[str, Any]):
+    def __init__(self, db_handler: MongoDBHandler, session_id: str, email: str, metrics: Dict[str, Any], tags: Dict[str, Any]):
         self.db_handler = db_handler
         self.session_id = session_id
         self.email = email
@@ -152,7 +152,7 @@ class Session:
                 session_id=data["session_id"],
                 email=data["email"],
                 metrics=data["metrics"],
-                tags=data["tags"]
+                tags=data.get("tags", dict())
             )
             session._id = str(data["_id"])
             sessions.append(session)
