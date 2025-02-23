@@ -241,10 +241,13 @@ def submit_answer():
         #print("FINE::::::::::::")
         db_handler.update("stories_database", story_id, story_data)
         #print("FINE::::::::::::")
+
+        story_explanation = story_data["explanation"] if story_data["explanation"] != "" else "You selected the wrong summary. The fake summary used misleading statistics."
+        print(story_explanation)
         return jsonify({
             "correct": correct,
             "score": user_session.metrics["score"],
-            "explanation": "You selected the wrong summary. The fake summary used misleading statistics." if not correct else ""
+            "explanation": story_explanation if not correct else ""
         })
     except Exception as e:
         print("Error", e)
