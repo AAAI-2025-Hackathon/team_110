@@ -131,15 +131,15 @@ def generate():
         unseen_stories = [story for story in available_stories if str(story["_id"]) not in seen_stories]
         
         next_accent, next_convincingness = select_next_accent_and_convincingness(user_session.tags)
-
+        print("New accents: ",next_accent, next_convincingness)
         ## With a small propbability always try and generate new and exciting fake stories.
         print("[INFO] User has not seen stories count:",len(unseen_stories))
-        if len(unseen_stories) > 0 and random.random() > 0.9: ## Try and force new generations of stories now
+        if len(unseen_stories) > 0 and random.random() > 0.0: ## Try and force new generations of stories now
             print("[INFO] Reusing an exsisting story")
             unseen_story = make_serializable(unseen_stories[0])
             ###print(unseen_story)
-            unseen_story["use_accent"] = next_convincingness
-            unseen_story["use_convincingness"] = next_accent
+            unseen_story["use_accent"] = next_accent
+            unseen_story["use_convincingness"] = next_convincingness
             return jsonify(unseen_story)
         else:
             print("[INFO] Creating a new story")
@@ -204,6 +204,8 @@ def submit_answer():
         correct_fake_position = data.get("correctFakePosition")
         story_id = data.get("story_id")
 
+        print("Data:", data)
+
         currentAccent = data.get("randomAccent", None)
         currentConvincingness = data.get("convincingness", None)
         
@@ -226,26 +228,26 @@ def submit_answer():
         
         user_session.metrics["score"] += 100 if correct else 0
         user_session.metrics["history"].append({"story_id": story_id, "correct": correct})
-        
-        update_tags(user_session.tags, currentAccent, currentConvincingness, not correct)
+        print("FINE::::::::::::", currentAccent, currentConvincingness) 
+        # quick fix rename the variables
+        user_session.tags = update_tags(user_session.tags, currentAccent, currentConvincingness, not correct)
         user_session.save()
-
-        if not db_handler.update("session_db", user_session._id, {"metrics": user_session.metrics}):
-            return jsonify({"error": "Failed to update session"}), 500
-        
+        #print("FINE::::::::::::1")
+        #db_handler.update("session_db", user_session._id, {"metrics": user_session.metrics})
+        #print("FINE::::::::::::2")
         story_data["num_occurances"] = story_data.get("num_occurances", 0) + 1
         if correct:
             story_data["num_success"] = story_data.get("num_success", 0) + 1
-
-        if not db_handler.update("stories_database", story_id, story_data):
-            return jsonify({"error": "Failed to update story"}), 500
-        
+        #print("FINE::::::::::::")
+        db_handler.update("stories_database", story_id, story_data)
+        #print("FINE::::::::::::")
         return jsonify({
             "correct": correct,
             "score": user_session.metrics["score"],
             "explanation": "You selected the wrong summary. The fake summary used misleading statistics." if not correct else ""
         })
     except Exception as e:
+        print("Error", e)
         return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
     
 

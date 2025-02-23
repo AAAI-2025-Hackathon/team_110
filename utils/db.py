@@ -26,6 +26,7 @@ class MongoDBHandler:
     def update(self, collection: str, obj_id: str, update_data: dict) -> bool:
         """Update a document by its ID."""
         result = self.db[collection].update_one({"_id": ObjectId(obj_id)}, {"$set": update_data})
+        #print(result)
         return result.modified_count > 0
     
     def delete(self, collection: str, obj_id: str) -> bool:
@@ -110,7 +111,7 @@ class Session:
         self.email = email
         self.metrics = metrics
         self._id: Optional[str] = None
-        self.tags = dict()
+        self.tags = tags if len(tags) != 0 else dict()
 
     def save(self):
         """Save or update the session in the database."""
