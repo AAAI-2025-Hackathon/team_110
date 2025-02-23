@@ -28,7 +28,16 @@
             border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-
+        .button_read_text {
+            background-color: white;
+            color: navy;
+            border: 2px solid navy;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            }
         .container {
             display: flex;
             gap: 30px;
@@ -82,16 +91,20 @@
     </div>
 
     <div class="container">
-        <div class="news-card" id="news1" onclick="checkAnswer(1)">
-            <h3>Summary 1</h3>
-            <p class="summary" id="news_summary_1">Loading...</p>
-            <button onclick="speakText('news_summary_1')">Read Text</button>
+        <div class="news-card" id="news1">
+           <div onclick="checkAnswer(1)">
+                <h3>Summary 1</h3>
+                <p class="summary" id="news_summary_1">Loading...</p> 
+           </div>
+            <button onclick="speakText('news_summary_1')" class="button_read_text">Read Text 🔊</button>
         </div>
         
-        <div class="news-card" id="news2" onclick="checkAnswer(2)">
-            <h3>Summary 2</h3>
+        <div class="news-card" id="news2">
+            <div onclick="checkAnswer(2)">
+                <h3>Summary 2</h3>
             <p class="summary" id="news_summary_2">Loading...</p>
-            <button onclick="speakText('news_summary_2')">Read Text</button>
+            </div>
+            <button onclick="speakText('news_summary_2')" class="button_read_text">Read Text 🔊</button>
         </div>
     </div>
 
@@ -152,7 +165,6 @@
                     document.getElementById('news_summary_2').textContent = result.real_summary;
                     correctFakePosition = 1;
                 }
-                console.log("The voice data:",randomAccent, convincingness)
                 current_story_id = result._id
 
             } catch (error) {
@@ -215,8 +227,14 @@
             if (convincingness === null) {
                 convincingness = CONVINCINGNESS_LEVELS[Math.floor(Math.random() * CONVINCINGNESS_LEVELS.length)];
             }
-            utterance.rate = convincingness.rate;  
-            utterance.pitch = convincingness.pitch;
+            if (convincingness.rate !== null && isFinite(convincingness.rate)) {
+                utterance.rate = convincingness.rate;
+                utterance.pitch = convincingness.pitch;
+            } else {
+                utterance.rate = 1.0;  // Default value when convincingness.rate is invalid
+                utterance.pitch = 1.0;
+            }
+            
 
             // Try to find a voice matching the chosen accent
             let voices = window.speechSynthesis.getVoices();

@@ -89,6 +89,16 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .button_read_text {
+            background-color: white;
+            color: navy;
+            border: 2px solid navy;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            }
     </style>
 </head>
 <body>
@@ -102,7 +112,7 @@
     <div class="news-card">
         <h3>News Summary</h3>
         <p class="summary" id="news_summary">Loading...</p>
-        <button onclick="speakText('news_summary')">Read Text</button>
+        <button onclick="speakText('news_summary')" class="button_read_text">Read Text 🔊</button>
     </div>
 
     <div class="btn-container">
@@ -148,7 +158,7 @@
 
                 isTrueSummary = Math.random() < 0.5;
                 current_story_id = result._id
-                console.log("The voice data:",randomAccent, convincingness)
+
                 document.getElementById('news_summary').textContent = isTrueSummary ? result.real_summary : result.fake_summary;
             } catch (error) {
                 console.error('Error fetching summary:', error);
@@ -212,8 +222,14 @@
             if (convincingness === null) {
                 convincingness = CONVINCINGNESS_LEVELS[Math.floor(Math.random() * CONVINCINGNESS_LEVELS.length)];
             }
-            utterance.rate = convincingness.rate;  
-            utterance.pitch = convincingness.pitch;
+            if (convincingness.rate !== null && isFinite(convincingness.rate)) {
+                utterance.rate = convincingness.rate;
+                utterance.pitch = convincingness.pitch;
+            } else {
+                utterance.rate = 1.0;  // Default value when convincingness.rate is invalid
+                utterance.pitch = 1.0;
+            }
+            
 
             // Try to find a voice matching the chosen accent
             let voices = window.speechSynthesis.getVoices();
