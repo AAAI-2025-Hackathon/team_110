@@ -67,10 +67,10 @@ def update_tags(tags, current_accent, current_convincingness, was_tricked):
     
     if key not in tags["accents"]:
         tags["accents"][key] = {"num_success": 0, "num_attempts": 0}
-
+    print("Hello")
     # Increment attempts for this accent/convincingness
     tags["accents"][key]["num_attempts"] += 1
-    
+    print("Hello1")
     if was_tricked:
         # If the model successfully tricked the user, increase success count
         tags["accents"][key]["num_success"] += 1

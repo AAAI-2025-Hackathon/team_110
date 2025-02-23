@@ -148,7 +148,7 @@
 
                 isTrueSummary = Math.random() < 0.5;
                 current_story_id = result._id
-
+                console.log("The voice data:",randomAccent, convincingness)
                 document.getElementById('news_summary').textContent = isTrueSummary ? result.real_summary : result.fake_summary;
             } catch (error) {
                 console.error('Error fetching summary:', error);

@@ -152,6 +152,7 @@
                     document.getElementById('news_summary_2').textContent = result.real_summary;
                     correctFakePosition = 1;
                 }
+                console.log("The voice data:",randomAccent, convincingness)
                 current_story_id = result._id
 
             } catch (error) {

@@ -3,10 +3,12 @@
 from db import *
 from tqdm import tqdm
 from mock_db import MOCK_RESPONSES
+import os
 
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/mydatabase")
 
 if __name__ == "__main__":
-    db_handler = MongoDBHandler("mongo_news")
+    db_handler = MongoDBHandler(MONGO_URI, "mongo_news")
     
     for story in tqdm(MOCK_RESPONSES):
         try:
