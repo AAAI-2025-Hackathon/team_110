@@ -60,22 +60,28 @@ def select_next_accent_and_convincingness(tags):
 
 
 # Update stats after each attempt
-def update_tags(tags, current_accent, current_convincingness, was_tricked):
-    initialize_tags(tags)
+def update_tags(tags, current_accent, current_convincingness, was_tricked, count=0):
+    if count > 1:
+        return tags
+    try:
+        #print("Start")
+        initialize_tags(tags)
+        #print("Hello 000", current_accent, current_convincingness)
+        key = generate_key(current_accent, current_convincingness["rate"], current_convincingness["pitch"])
+        #print("Hello0")
+        if key not in tags["accents"]:
+            tags["accents"][key] = {"num_success": 0, "num_attempts": 0}
+        #print("Hello")
+        # Increment attempts for this accent/convincingness
+        tags["accents"][key]["num_attempts"] += 1
+        #print("Hello1")
+        if was_tricked:
+            # If the model successfully tricked the user, increase success count
+            tags["accents"][key]["num_success"] += 1
+        else:
+            # If the human got it right (model failed), decrease confidence in this combination
+            tags["accents"][key]["num_success"] = max(0, tags["accents"][key]["num_success"] - 0.5)
+        return tags
+    except: 
+        return update_tags(tags, current_convincingness, current_accent, was_tricked, 1)
     
-    key = generate_key(current_accent, current_convincingness["rate"], current_convincingness["pitch"])
-    
-    if key not in tags["accents"]:
-        tags["accents"][key] = {"num_success": 0, "num_attempts": 0}
-    print("Hello")
-    # Increment attempts for this accent/convincingness
-    tags["accents"][key]["num_attempts"] += 1
-    print("Hello1")
-    if was_tricked:
-        # If the model successfully tricked the user, increase success count
-        tags["accents"][key]["num_success"] += 1
-    else:
-        # If the human got it right (model failed), decrease confidence in this combination
-        tags["accents"][key]["num_success"] = max(0, tags["accents"][key]["num_success"] - 0.5)
-
-    return tags
