@@ -117,8 +117,8 @@
     </div>
 
     <div class="btn-container">
-        <button class="btn btn-fake" onclick="checkAnswer(false)">Fake</button>
-        <button class="btn btn-true" onclick="checkAnswer(true)">True</button>
+        <button id="btn_fake" class="btn btn-fake" onclick="checkAnswer(false)">Fake</button>
+        <button id="btn_true" class="btn btn-true" onclick="checkAnswer(true)">True</button>
     </div>
 
     <p id="explanationText" style="display: none; font-weight: bold; color: red;"></p>
@@ -250,6 +250,10 @@
 
         async function checkAnswer(userThinksTrue) {
             try {
+                const btn_fake = document.getElementById('btn_fake');
+                btn_fake.style.pointerEvents = 'none';
+                const btn_true = document.getElementById('btn_true');
+                btn_true.style.pointerEvents = 'none';
                 const response = await fetch('/submit-answer', {
                     method: 'POST',
                     headers: {
@@ -281,6 +285,10 @@
         }
 
         function postNewQuestion() {
+            const btn_fake = document.getElementById('btn_fake');
+            btn_fake.style.pointerEvents = 'auto';
+            const btn_true = document.getElementById('btn_true');
+            btn_true.style.pointerEvents = 'auto';
             // Create a form dynamically
             let form = document.createElement("form");
             form.method = "POST";

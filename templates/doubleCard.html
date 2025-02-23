@@ -266,6 +266,10 @@
         // send answer if correct and get back the wonderful explanation from over AI overlords.
         async function checkAnswer(selectedPosition) {
             try {
+                const news1 = document.getElementById('news1');
+                news1.style.pointerEvents = 'none'; 
+                const news2 = document.getElementById('news2');
+                news2.style.pointerEvents = 'none'; 
                 const response = await fetch('/submit-answer', {
                     method: 'POST',
                     headers: {
@@ -297,6 +301,12 @@
         }
 
         function postNewQuestion() {
+            const news1 = document.getElementById('news1');
+            news1.style.pointerEvents = 'auto';
+
+            const news2 = document.getElementById('news2');
+            news2.style.pointerEvents = 'auto';
+
             // Create a form dynamically
             let form = document.createElement("form");
             form.method = "POST";
