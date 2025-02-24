@@ -1,4 +1,4 @@
-# TruthDetect AI: Exposing Misinformation with AI
+# TruthDetect AI: FakeXplainer AI: Unraveling Deception to Strengthen Critical Thinking
 
 ## Summary
 
@@ -63,3 +63,12 @@ Why this matters: Misinformation is a growing concern in today’s digital lands
 * Multi-Language Support: Expanding accessibility to different languages and cultural misinformation patterns.
 
 Created for AAAI Hackathon 2025
+
+# Check-In
+
+- Title of your submission: **[FakeXplainer AI: Unraveling Deception to Strengthen Critical Thinking]**
+- Team Members: [Ashwin Ravindra Bharadwaj](mailto:bharadwaj.ash@northeastern.edu), [Ankit Sinha](mailto:sinha.ank@northeastern.edu)
+- [X] All team members agree to abide by the [Hackathon Rules](https://aaai.org/conference/aaai/aaai-25/hackathon/)
+- [X] This AAAI 2025 hackathon entry was created by the team during the period of the hackathon, February 17 – February 24, 2025
+- [] The entry includes a 2-minute maximum length demo video here: [Link](https://your-link.com)
+- [] The entry clearly identifies the selected theme in the README and the video.
