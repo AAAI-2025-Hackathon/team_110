@@ -1,8 +1,23 @@
 # TruthDetect AI: FakeXplainer AI: Unraveling Deception to Strengthen Critical Thinking
 
+## THEME
+** AI for Social Good **
+
 ## Summary
 
 TruthDetect AI is an innovative web application powered by a fine-tuned Large Language Model (LLM) designed to educate users on misinformation by generating both real and fake summaries of products, news, and historical events. The system explains the logical, statistical, and reasoning techniques it uses to craft fake summaries, helping users develop critical thinking skills to identify misinformation.
+
+## Use Cases
+
+Why this matters: Misinformation is a growing concern in today’s digital landscape. TruthDetect AI helps:
+
+* Children & Students – Learn to spot fake news and propaganda through an engaging and interactive experience.
+
+* Investors – Avoid financial traps by identifying fake product reviews and misleading corporate narratives.
+
+* General Public – Recognize deceptive crowdfunding campaigns and fraudulent marketing techniques.
+
+* Political Awareness – Understand how political misinformation is created and spread, and how to critically analyze news sources.
 
 ## Key Features
 
@@ -26,9 +41,9 @@ Try it now: TruthDetect AI Web App🔹 Current Version: v0.0.4
 
 * The core model is a fine-tuned GPT-3.5.
 
-* Training data includes 200 hand-curated examples from GPT-4 and DeepSeek, validated by human participants.
+* Training data includes 200 hand-curated examples from GPT-4 and DeepSeek, validated by 11 human participants.
 
-* Data selection involved filtering 46 high-quality summaries (real & fake) that successfully deceived humans at a rate of 56%.
+* Data selection involved filtering 46 high-quality summaries (real & fake) that successfully deceived humans at a rate of 56% (n = 11).
 
 * The model was fine-tuned to recognize topic categories and deception techniques.
 
@@ -39,18 +54,8 @@ Try it now: TruthDetect AI Web App🔹 Current Version: v0.0.4
     * Over 30 participants tested the model, generating 1000+ summaries, with 712 successful deceptions.
 
     * The AI constantly learns and adapts, improving over time in misinformation generation and detection.
-
-## Use Cases
-
-Why this matters: Misinformation is a growing concern in today’s digital landscape. TruthDetect AI helps:
-
-* Children & Students – Learn to spot fake news and propaganda through an engaging and interactive experience.
-
-* Investors – Avoid financial traps by identifying fake product reviews and misleading corporate narratives.
-
-* General Public – Recognize deceptive crowdfunding campaigns and fraudulent marketing techniques.
-
-* Political Awareness – Understand how political misinformation is created and spread, and how to critically analyze news sources.
+      
+* The system utilizes a dynamic text-to-speech engine that modifies speech speed and accent using a Reinforcement Learning approach, specifically the Upper Confidence Bound (UCB) algorithm. This enables the AI to determine the most effective voice modulation to maximize the likelihood of deceiving individual users.
 
 ## Future Improvements
 
@@ -71,4 +76,4 @@ Created for AAAI Hackathon 2025
 - [X] All team members agree to abide by the [Hackathon Rules](https://aaai.org/conference/aaai/aaai-25/hackathon/)
 - [X] This AAAI 2025 hackathon entry was created by the team during the period of the hackathon, February 17 – February 24, 2025
 - [] The entry includes a 2-minute maximum length demo video here: [Link](https://your-link.com)
-- [] The entry clearly identifies the selected theme in the README and the video.
+- [X] The entry clearly identifies the selected theme in the README and the video.
