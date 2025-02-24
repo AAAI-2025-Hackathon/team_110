@@ -134,7 +134,7 @@ def generate():
         print("New accents: ",next_accent, next_convincingness)
         ## With a small propbability always try and generate new and exciting fake stories.
         print("[INFO] User has not seen stories count:",len(unseen_stories))
-        if len(unseen_stories) > 0 and random.random() > 0.25: ## Try and force new generations of stories now
+        if len(unseen_stories) > 0 and random.random() > 0.9: ## Try and force new generations of stories now
             print("[INFO] Reusing an exsisting story")
             unseen_story = make_serializable(unseen_stories[0])
             ###print(unseen_story)
