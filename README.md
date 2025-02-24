@@ -1,4 +1,4 @@
-# TruthDetect AI: FakeXplainer AI: Unraveling Deception to Strengthen Critical Thinking
+# FakeXplainer AI: Unraveling Deception to Strengthen Critical Thinking
 
 ## THEME
 ** AI for Social Good **
